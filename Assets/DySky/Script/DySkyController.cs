@@ -169,9 +169,10 @@ public class DySkyController : MonoBehaviour
             Matrix4x4 M = transSkydome.localToWorldMatrix;
             Matrix4x4 V = Camera.main.worldToCameraMatrix;
             Matrix4x4 P = Matrix4x4.Perspective(fov, Camera.main.aspect, 0.01f, 1000f);
-            // fixed for DX engine
-            if (Application.platform == RuntimePlatform.WindowsPlayer || Application.platform == RuntimePlatform.WindowsEditor)
-                P = GL.GetGPUProjectionMatrix(P, true);
+            // fixed matrix issue for DX engine
+#if UNITY_STANDALONE_WIN
+            P = GL.GetGPUProjectionMatrix(P, true);
+#endif
             Shader.SetGlobalMatrix(Uniforms._DySky_mMVP, P * V * M);
         }
     }
