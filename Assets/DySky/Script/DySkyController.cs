@@ -45,6 +45,9 @@ public class DySkyController : MonoBehaviour
     [Range(1f, 179f)]
     public float fov = 60.0f;
 
+    [Space(10)]
+    public bool renderIntoRT = false;
+
     const float Inv24 = 1f / 24f;
 
     static class Uniforms
@@ -168,10 +171,13 @@ public class DySkyController : MonoBehaviour
         {
             Matrix4x4 M = transSkydome.localToWorldMatrix;
             Matrix4x4 V = Camera.main.worldToCameraMatrix;
-            Matrix4x4 P = Matrix4x4.Perspective(fov, Camera.main.aspect, 0.01f, 1000f);
-            // fixed matrix issue for DX engine
+            Matrix4x4 P = Matrix4x4.Perspective(fov, Camera.main.aspect, 0.3f, 1000f);
 #if UNITY_STANDALONE_WIN
+            // fixed matrix issue for DX engine
             P = GL.GetGPUProjectionMatrix(P, true);
+#else
+            // fixed matrix issue for render into RT mode(affected by Image Effect[OnRenderImage])
+            P = GL.GetGPUProjectionMatrix(P, renderIntoRT);
 #endif
             Shader.SetGlobalMatrix(Uniforms._DySky_mMVP, P * V * M);
         }
