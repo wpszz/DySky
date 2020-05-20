@@ -55,8 +55,12 @@
 
 				//Optical Depth.
 				//--------------------------------
+#if 0
 				half zenith = acos(saturate(dot(half3(0.0, 1.0, 0.0), viewDir)));
 				half z      = cos(zenith) + 0.15 * pow(93.885 - ((zenith * 180.0) / UNITY_PI), -1.253);
+#else
+				half z		= max(0, viewDir.y) + 1e-5;
+#endif
 				half SR     = _DySky_kRayleigh / z;
 				half SM     = _DySky_kMie / z;
 
@@ -104,7 +108,7 @@
 				OUT.cloudUV.xy = cloudPos.xz * 0.25 + cloudSpeed - 0.005;
 				OUT.cloudUV.zw = cloudPos.xz * 0.35 + cloudSpeed - 0.0065;
 
-				//fade out skyline
+				//Fade out skyline
 				half horizonExtinction = saturate(viewDir.y * 1000.0) * fex.b;
 
 				OUT.starPos = half4(mul((float3x3)_DySky_mStarfieldSpace, viewDir), pow(sin(viewDir.x * 1000 + _Time.w) * 0.5 + 0.5, 2.5));

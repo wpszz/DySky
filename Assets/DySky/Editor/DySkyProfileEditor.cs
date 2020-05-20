@@ -16,6 +16,7 @@ public class DySkyProfileEditor : Editor
     List<SerializedProperty> props;
     List<object> values;
     List<object> values_standard;
+    List<float> spaces;
 
     bool standardHide;
 
@@ -30,11 +31,14 @@ public class DySkyProfileEditor : Editor
         props = new List<SerializedProperty>();
         values = new List<object>();
         values_standard = new List<object>();
+        spaces = new List<float>();
         foreach (var field in profile.GetType().GetFields(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.GetField | BindingFlags.Instance))
         {
             props.Add(serializedObject.FindProperty(field.Name));
             values.Add(field.GetValue(profile));
             values_standard.Add(field.GetValue(standard));
+            var attrs = field.GetCustomAttributes(typeof(SpaceAttribute), false);
+            spaces.Add(attrs.Length > 0 ? (attrs[0] as SpaceAttribute).height : 0);
         }
 
         standardHide = true;
@@ -67,7 +71,7 @@ public class DySkyProfileEditor : Editor
             EditorGUILayout.BeginHorizontal();
 
             EditorGUILayout.PropertyField(prop, new GUIContent(prop.displayName.Replace("Curve ", "").Replace("Grad ", "")));
-            if (GUILayout.Button("R", EditorStyles.miniButton, GUILayout.Width(20), GUILayout.Height(15)))
+            if (GUILayout.Button("R", EditorStyles.miniButton, GUILayout.Width(20), GUILayout.Height(15 + spaces[i])))
             {
                 object value = values[i];
                 object value_standard = values_standard[i];

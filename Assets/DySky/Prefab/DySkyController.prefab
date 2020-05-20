@@ -54,6 +54,8 @@ MonoBehaviour:
   timeline: 6.5
   longitude: 0
   latitude: 0
+  sunScale: 1.2
+  moonScale: 1
   moonPhaseX: 0.18
   moonPhaseY: -0.1
   moonPhaseW: 0
@@ -61,6 +63,7 @@ MonoBehaviour:
   galaxyY: -30
   galaxyZ: 15
   fov: 60
+  renderIntoRT: 0
 --- !u!114 &204845586265603102
 MonoBehaviour:
   m_ObjectHideFlags: 0

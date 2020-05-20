@@ -26,6 +26,12 @@ public class DySkyController : MonoBehaviour
     public float latitude = 0.0f;
 
     [Space(10)]
+    [Range(0f, 2f)]
+    public float sunScale = 1.0f;
+
+    [Space(10)]
+    [Range(0f, 2f)]
+    public float moonScale = 1.0f;
     [Range(-0.5f, 0.5f)]
     public float moonPhaseX = 0.18f;
     [Range(-0.5f, 0.5f)]
@@ -87,6 +93,7 @@ public class DySkyController : MonoBehaviour
         internal static readonly int _DySky_tExposure               = Shader.PropertyToID("_DySky_tExposure");
 
         internal static readonly int _DySky_mMVP                    = Shader.PropertyToID("_DySky_mMVP");
+
     }
 
     private void Awake()
@@ -109,7 +116,6 @@ public class DySkyController : MonoBehaviour
         Shader.SetGlobalTexture(Uniforms._DySky_texMoon, texMoon);
         Shader.SetGlobalTexture(Uniforms._DySky_texCloudNoise, texCloudNoise);
         Shader.SetGlobalTexture(Uniforms._DySky_texStarfield, texStarfield);
-
     }
 
     private void LateUpdate()
@@ -144,12 +150,13 @@ public class DySkyController : MonoBehaviour
         Shader.SetGlobalFloat(Uniforms._DySky_tMoonBrightRange,         profile.curveMoonBrightRange.Evaluate(timeline24));
         Shader.SetGlobalColor(Uniforms._DySky_cMoonEmission,            profile.gradMoonEmission.Evaluate(progress01));
         Shader.SetGlobalColor(Uniforms._DySky_cMoonBright,              profile.gradMoonBright.Evaluate(progress01));
-        Shader.SetGlobalVector(Uniforms._DySky_unionMoonPhaseSize,      new Vector4(moonPhaseX, moonPhaseY, profile.curveMoonSize.Evaluate(timeline24), moonPhaseW));
+        Shader.SetGlobalVector(Uniforms._DySky_unionMoonPhaseSize,      
+            new Vector4(moonPhaseX, moonPhaseY, Mathf.Lerp(21f, 1f, profile.curveMoonSize.Evaluate(timeline24) * moonScale), moonPhaseW));
 
         // +Z-Axis point to the East
         float sunPhase = progress01 * 360.0f - 90.0f;
-        Shader.SetGlobalMatrix(Uniforms._DySky_mSunSpace,               Matrix4x4.Rotate(Quaternion.Euler(0.0f, longitude, latitude) * Quaternion.Euler(sunPhase, 180.0f, 0.0f)));
-        Shader.SetGlobalFloat(Uniforms._DySky_tSunSize,                 profile.curveSunSize.Evaluate(timeline24));
+        Shader.SetGlobalMatrix(Uniforms._DySky_mSunSpace,               Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0.0f, longitude, latitude) * Quaternion.Euler(sunPhase, 180.0f, 0.0f), Vector3.one));
+        Shader.SetGlobalFloat(Uniforms._DySky_tSunSize,                 Mathf.Lerp(11f, 1f, profile.curveSunSize.Evaluate(timeline24) * sunScale));
         Shader.SetGlobalColor(Uniforms._DySky_cSunEmission,             profile.gradSunEmission.Evaluate(progress01) * profile.curveSunEmissionIntensity.Evaluate(timeline24));
 
         float cloudDir = profile.curveCloudDir.Evaluate(timeline24);
@@ -161,7 +168,7 @@ public class DySkyController : MonoBehaviour
         Shader.SetGlobalColor(Uniforms._DySky_cCloudMainTint,           QualitySettings.activeColorSpace == ColorSpace.Gamma ? cCloudMainTint : cCloudMainTint.linear);
         Shader.SetGlobalColor(Uniforms._DySky_cCloudSecondaryTint,      QualitySettings.activeColorSpace == ColorSpace.Gamma ? cCloudSecondaryTint : cCloudSecondaryTint.linear);
 
-        Shader.SetGlobalMatrix(Uniforms._DySky_mStarfieldSpace,         Matrix4x4.Rotate(Quaternion.Euler(galaxyX, galaxyY, galaxyZ)));
+        Shader.SetGlobalMatrix(Uniforms._DySky_mStarfieldSpace,         Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(galaxyX, galaxyY, galaxyZ), Vector3.one));
         Shader.SetGlobalFloat(Uniforms._DySky_tStarfieldIntensity,      profile.curveStarfieldIntensity.Evaluate(timeline24));
         Shader.SetGlobalFloat(Uniforms._DySky_tGalaxyIntensity,         profile.curveGalaxyIntensity.Evaluate(timeline24));
 
@@ -169,6 +176,7 @@ public class DySkyController : MonoBehaviour
 
         if (Camera.main)
         {
+            Camera.main.clearFlags = CameraClearFlags.SolidColor;
             Matrix4x4 M = transSkydome.localToWorldMatrix;
             Matrix4x4 V = Camera.main.worldToCameraMatrix;
             Matrix4x4 P = Matrix4x4.Perspective(fov, Camera.main.aspect, 0.3f, 1000f);
@@ -177,7 +185,7 @@ public class DySkyController : MonoBehaviour
             P = GL.GetGPUProjectionMatrix(P, true);
 #else
             // fixed matrix issue for render into RT mode(affected by Image Effect[OnRenderImage])
-            P = GL.GetGPUProjectionMatrix(P, renderIntoRT);
+            P = GL.GetGPUProjectionMatrix(P, renderIntoRT || QualitySettings.antiAliasing > 0);
 #endif
             Shader.SetGlobalMatrix(Uniforms._DySky_mMVP, P * V * M);
         }
@@ -185,6 +193,7 @@ public class DySkyController : MonoBehaviour
 
     private void UpdateEnvironmentLighting(float progress01, float timeline24)
     {
+        RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
         RenderSettings.ambientIntensity = profile.curveEnvAmbientIntensity.Evaluate(timeline24);
         RenderSettings.ambientSkyColor = profile.gradEnvAmbient.Evaluate(progress01);
     }

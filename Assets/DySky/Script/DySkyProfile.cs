@@ -24,10 +24,10 @@ public class DySkyProfile : ScriptableObject
     public AnimationCurve   curveMoonBrightRange        = Linear24(10.0f);
     public Gradient         gradMoonEmission            = Blend24(1.0f, 1.0f, 1.0f);
     public Gradient         gradMoonBright              = Blend24(0.06f, 0.18f, 0.46f);
-    public AnimationCurve   curveMoonSize               = Linear24(6.0f);
+    public AnimationCurve   curveMoonSize               = Linear24(0.75f);
 
     [Space(10)]
-    public AnimationCurve   curveSunSize                = Linear24(3.0f);
+    public AnimationCurve   curveSunSize                = Linear24(0.75f);
     public Gradient         gradSunEmission             = Blend24(1.0f, 1.0f, 1.0f);
     public AnimationCurve   curveSunEmissionIntensity   = Linear24(3.0f);
 
