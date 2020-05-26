@@ -6783,6 +6783,11 @@ PrefabInstance:
       propertyPath: sunLight
       value: 
       objectReference: {fileID: 648276048}
+    - target: {fileID: 5653821916138422116, guid: 3fcce941d982d4942b3238f5129fe868,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5653821916138422136, guid: 3fcce941d982d4942b3238f5129fe868,
         type: 3}
       propertyPath: timeline
