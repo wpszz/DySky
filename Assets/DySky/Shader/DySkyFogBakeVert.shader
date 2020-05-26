@@ -39,12 +39,17 @@
 				half3 viewDir	= v.vertex.xyz;
 
 				float3x3 mSun = (float3x3)_DySky_mSunSpace;
-				half3 sunDir = -mSun[2];
-				half sunCosTheta = dot(viewDir, sunDir);
-				half sunrise = saturate(sunDir.y * 10.0);
-				half sunset = clamp(sunDir.y, 0.0, 0.5);
 
-				half3 moonDir = -sunDir;
+				//half3 sunDir = mul(mSun, half3(0, 0, 1));
+				half3 sunDir = half3(mSun._13, mSun._23, mSun._33);
+				half3 sunDirInv = -sunDir;
+				half sunCosTheta = dot(viewDir, sunDirInv);
+				half sunrise = saturate(sunDirInv.y * 10.0);
+				half sunset = clamp(sunDirInv.y, 0.0, 0.5);
+
+				half3 moonDirInv = -sunDirInv;
+				half moonCosTheta = dot(viewDir, moonDirInv);
+				half moonrise = saturate(moonDirInv.y * 10.0);
 
 				//Optical Depth.
 				//--------------------------------
@@ -82,11 +87,10 @@
 
 				//Moon Bright.
 				//--------------------------------
-				half  moonrise    = saturate(moonDir.y * 10.0);
-				half  bright      = 1.0 + dot(viewDir, -moonDir);
+				half  bright      = 1.0 - moonCosTheta;
 				half3 moonBright  = 1.0 / (1.0  + bright * _DySky_tMoonBrightRange) * _DySky_cMoonBright;
-				moonBright += 1.0 / (_DySky_tMoonEmissionIntensity  + bright * 200.0) * _DySky_cMoonEmission;
-				moonBright  = moonBright * moonrise;
+				moonBright += 1.0 / (_DySky_tMoonEmissionIntensity + bright * 200.0) * _DySky_cMoonEmission;
+				moonBright *= moonrise;
 
 				//Fade out skyline
 				half horizonExtinction = saturate(viewDir.y * 1000.0) * fex.b;

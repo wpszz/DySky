@@ -805,6 +805,64 @@ MonoBehaviour:
     m_Mode: 0
     m_NumColorKeys: 5
     m_NumAlphaKeys: 2
+  gradEnvAmbientEquator:
+    serializedVersion: 2
+    key0: {r: 0, g: 0, b: 0, a: 1}
+    key1: {r: 0.8018868, g: 0.3968673, b: 0.13995194, a: 1}
+    key2: {r: 0.9150943, g: 0.56486195, b: 0.34100214, a: 0}
+    key3: {r: 0.8039216, g: 0.4, b: 0.14117648, a: 0}
+    key4: {r: 0, g: 0, b: 0, a: 0}
+    key5: {r: 0, g: 0, b: 0, a: 0}
+    key6: {r: 0, g: 0, b: 0, a: 0}
+    key7: {r: 0, g: 0, b: 0, a: 0}
+    ctime0: 13107
+    ctime1: 20971
+    ctime2: 32768
+    ctime3: 44564
+    ctime4: 52428
+    ctime5: 0
+    ctime6: 0
+    ctime7: 0
+    atime0: 0
+    atime1: 65535
+    atime2: 0
+    atime3: 0
+    atime4: 0
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 0
+    m_NumColorKeys: 5
+    m_NumAlphaKeys: 2
+  gradEnvAmbientGround:
+    serializedVersion: 2
+    key0: {r: 0, g: 0, b: 0, a: 1}
+    key1: {r: 0.5943396, g: 0.29897204, b: 0.09812209, a: 1}
+    key2: {r: 0.7735849, g: 0.53680134, b: 0.38314345, a: 0}
+    key3: {r: 0.59607846, g: 0.3019608, b: 0.101960786, a: 0}
+    key4: {r: 0, g: 0, b: 0, a: 0}
+    key5: {r: 0, g: 0, b: 0, a: 0}
+    key6: {r: 0, g: 0, b: 0, a: 0}
+    key7: {r: 0, g: 0, b: 0, a: 0}
+    ctime0: 13107
+    ctime1: 20971
+    ctime2: 32768
+    ctime3: 44564
+    ctime4: 52428
+    ctime5: 0
+    ctime6: 0
+    ctime7: 0
+    atime0: 0
+    atime1: 65535
+    atime2: 0
+    atime3: 0
+    atime4: 0
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 0
+    m_NumColorKeys: 5
+    m_NumAlphaKeys: 2
   curveEnvAmbientIntensity:
     serializedVersion: 2
     m_Curve:
@@ -856,6 +914,131 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 24
       value: 0.3
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  gradMainLightTint:
+    serializedVersion: 2
+    key0: {r: 0.2509804, g: 0.65882355, b: 1, a: 1}
+    key1: {r: 1, g: 0.6313726, b: 0.23529412, a: 1}
+    key2: {r: 1, g: 1, b: 1, a: 0}
+    key3: {r: 1, g: 1, b: 1, a: 0}
+    key4: {r: 1, g: 0.6313726, b: 0.23529412, a: 0}
+    key5: {r: 0.2509804, g: 0.65882355, b: 1, a: 0}
+    key6: {r: 0.2509804, g: 0.65882355, b: 1, a: 0}
+    key7: {r: 0, g: 0, b: 0, a: 0}
+    ctime0: 13107
+    ctime1: 18350
+    ctime2: 26214
+    ctime3: 39321
+    ctime4: 47185
+    ctime5: 52428
+    ctime6: 52428
+    ctime7: 0
+    atime0: 0
+    atime1: 65535
+    atime2: 0
+    atime3: 0
+    atime4: 0
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 0
+    m_NumColorKeys: 6
+    m_NumAlphaKeys: 2
+  curveMainLightIntensity:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 5.2
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 5.5
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 5.8
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 6.1
+      value: 1
+      inSlope: 0.008170934
+      outSlope: 0.008170934
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 17.9
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 18.2
+      value: 0
+      inSlope: -0.0028688882
+      outSlope: -0.0028688882
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 18.5
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 18.8
+      value: 1
+      inSlope: -0.0022289057
+      outSlope: -0.0022289057
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 24
+      value: 1
       inSlope: 0
       outSlope: 0
       tangentMode: 0

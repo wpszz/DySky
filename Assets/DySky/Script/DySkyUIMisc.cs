@@ -29,6 +29,12 @@ public class DySkyUIMisc : MonoBehaviour {
             string info = "";
             info += string.Format("FPS: {0:0.00}\n", 1f / Time.unscaledDeltaTime);
             info += string.Format("MSAA: {0}\n", QualitySettings.antiAliasing);
+
+            float utcTime24 = controller.GetCurrentUTCTime24();
+            int hour = (int)utcTime24;
+            int minute = (int)((utcTime24 - hour) * 60);
+            info += string.Format("UTC Time: {0:00}:{1:00}\n", hour, minute);
+
             textInfo.text = info;
         }
     }

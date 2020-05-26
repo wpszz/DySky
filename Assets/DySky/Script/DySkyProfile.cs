@@ -49,7 +49,13 @@ public class DySkyProfile : ScriptableObject
 
     [Space(10)]
     public Gradient         gradEnvAmbient              = Blend24(0.5f, 0.5f, 0.5f);
+    public Gradient         gradEnvAmbientEquator       = Blend24(0.5f, 0.5f, 0.5f);
+    public Gradient         gradEnvAmbientGround        = Blend24(0.5f, 0.5f, 0.5f);
     public AnimationCurve   curveEnvAmbientIntensity    = Linear24(1.0f);
+
+    [Space(10)]
+    public Gradient         gradMainLightTint           = Blend24(1.0f, 1.0f, 1.0f);
+    public AnimationCurve   curveMainLightIntensity     = Linear24(1.0f);
 
     // ====================================
     private static AnimationCurve Linear24(float initVal)

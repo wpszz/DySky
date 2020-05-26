@@ -54,7 +54,12 @@ public class DySkyController : MonoBehaviour
     [Space(10)]
     public bool renderIntoRT = false;
 
+    [Tooltip("Trilight ambient lighting")]
+    [Space(10)]
+    public bool ambientTrilight = true;
+
     const float Inv24 = 1f / 24f;
+    const float LongitudePerHour = 24f / 360f;
 
     static class Uniforms
     {
@@ -120,11 +125,12 @@ public class DySkyController : MonoBehaviour
 
     private void LateUpdate()
     {
-        float progress = timeline * Inv24;
+        float utcTime24 = GetCurrentUTCTime24();
+        float progress01 = GetCurrentProgress01();
 
         UpdateSkydomePos();
-        UpdateDySkyUniforms(progress, timeline);
-        UpdateEnvironmentLighting(progress, timeline);
+        UpdateDySkyUniforms(progress01, utcTime24);
+        UpdateEnvironmentLighting(progress01, utcTime24);
     }
 
     private void UpdateSkydomePos()
@@ -153,9 +159,8 @@ public class DySkyController : MonoBehaviour
         Shader.SetGlobalVector(Uniforms._DySky_unionMoonPhaseSize,      
             new Vector4(moonPhaseX, moonPhaseY, Mathf.Lerp(21f, 1f, profile.curveMoonSize.Evaluate(timeline24) * moonScale), moonPhaseW));
 
-        // +Z-Axis point to the East
-        float sunPhase = progress01 * 360.0f - 90.0f;
-        Shader.SetGlobalMatrix(Uniforms._DySky_mSunSpace,               Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0.0f, longitude, latitude) * Quaternion.Euler(sunPhase, 180.0f, 0.0f), Vector3.one));
+        Quaternion sunSpace = GetCurrentSunRotation();
+        Shader.SetGlobalMatrix(Uniforms._DySky_mSunSpace,               Matrix4x4.TRS(Vector3.zero, sunSpace, Vector3.one));
         Shader.SetGlobalFloat(Uniforms._DySky_tSunSize,                 Mathf.Lerp(11f, 1f, profile.curveSunSize.Evaluate(timeline24) * sunScale));
         Shader.SetGlobalColor(Uniforms._DySky_cSunEmission,             profile.gradSunEmission.Evaluate(progress01) * profile.curveSunEmissionIntensity.Evaluate(timeline24));
 
@@ -168,7 +173,7 @@ public class DySkyController : MonoBehaviour
         Shader.SetGlobalColor(Uniforms._DySky_cCloudMainTint,           QualitySettings.activeColorSpace == ColorSpace.Gamma ? cCloudMainTint : cCloudMainTint.linear);
         Shader.SetGlobalColor(Uniforms._DySky_cCloudSecondaryTint,      QualitySettings.activeColorSpace == ColorSpace.Gamma ? cCloudSecondaryTint : cCloudSecondaryTint.linear);
 
-        Shader.SetGlobalMatrix(Uniforms._DySky_mStarfieldSpace,         Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(galaxyX, galaxyY, galaxyZ), Vector3.one));
+        Shader.SetGlobalMatrix(Uniforms._DySky_mStarfieldSpace,         Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(galaxyX, galaxyY, galaxyZ) * sunSpace, Vector3.one));
         Shader.SetGlobalFloat(Uniforms._DySky_tStarfieldIntensity,      profile.curveStarfieldIntensity.Evaluate(timeline24));
         Shader.SetGlobalFloat(Uniforms._DySky_tGalaxyIntensity,         profile.curveGalaxyIntensity.Evaluate(timeline24));
 
@@ -193,8 +198,50 @@ public class DySkyController : MonoBehaviour
 
     private void UpdateEnvironmentLighting(float progress01, float timeline24)
     {
-        RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
+        if (ambientTrilight)
+        {
+            RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Trilight;
+            RenderSettings.ambientSkyColor = profile.gradEnvAmbient.Evaluate(progress01);
+            RenderSettings.ambientEquatorColor = profile.gradEnvAmbientEquator.Evaluate(progress01);
+            RenderSettings.ambientGroundColor = profile.gradEnvAmbientGround.Evaluate(progress01);
+        }
+        else
+        {
+            RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
+            RenderSettings.ambientLight = profile.gradEnvAmbient.Evaluate(progress01);
+        }
         RenderSettings.ambientIntensity = profile.curveEnvAmbientIntensity.Evaluate(timeline24);
-        RenderSettings.ambientSkyColor = profile.gradEnvAmbient.Evaluate(progress01);
+    }
+
+    public float GetCurrentUTCTime24()
+    {
+        return Mathf.Repeat(timeline + longitude * LongitudePerHour, 24f);
+    }
+
+    public float GetCurrentProgress01()
+    {
+        return GetCurrentUTCTime24() * Inv24;
+    }
+
+    public Quaternion GetCurrentSunRotation()
+    {
+        return Quaternion.AngleAxis(GetCurrentProgress01() * 360f - 90f, Vector3.right) * Quaternion.AngleAxis(latitude, Vector3.up);
+    }
+
+    public Vector3 GetCurrentDirectionalLightForward()
+    {
+        Vector3 forward = GetCurrentSunRotation() * Vector3.forward;
+        if (forward.y > 0) forward = -forward; // moon direction
+        return forward;
+    }
+
+    public Color GetCurrentDirectionalLightColor()
+    {
+        return profile.gradMainLightTint.Evaluate(GetCurrentProgress01());
+    }
+
+    public float GetCurrentDirectionalLightIntensity()
+    {
+        return profile.curveMainLightIntensity.Evaluate(GetCurrentUTCTime24());
     }
 }

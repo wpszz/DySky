@@ -12,8 +12,8 @@ public class DySkyCameraMove : MonoBehaviour {
 #if UNITY_STANDALONE_WIN || UNITY_EDITOR
         if (Input.GetKey(KeyCode.A)) deltaX = -speed * Time.deltaTime;
         else if (Input.GetKey(KeyCode.D)) deltaX = speed * Time.deltaTime;
-        if (Input.GetKey(KeyCode.Q)) deltaY = speed * Time.deltaTime;
-        else if (Input.GetKey(KeyCode.E)) deltaY = -speed * Time.deltaTime;
+        if (Input.GetKey(KeyCode.Q)) deltaY = -speed * Time.deltaTime;
+        else if (Input.GetKey(KeyCode.E)) deltaY = speed * Time.deltaTime;
         if (Input.GetKey(KeyCode.W)) deltaZ = speed * Time.deltaTime;
         else if (Input.GetKey(KeyCode.S)) deltaZ = -speed * Time.deltaTime;
 #else

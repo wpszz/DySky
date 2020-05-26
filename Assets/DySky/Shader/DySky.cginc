@@ -49,10 +49,17 @@ uniform half4       _DySky_unionDisFogParams;     // x:start y:1/dis z:density w
 #define __DySky_MiePhaseFunc half3(0.4375, 1.5625, 1.5)
 #define __DySky_Scattering 60.0 * _DySky_tScattering
 
-
+#ifdef DY_SKY_FOG_ENABLE
 #define DY_SKY_FOG_POS(idx) half4 dySkyFogPos : TEXCOORD##idx;
 #define DY_SKY_FOG_VERT(v, o) o.dySkyFogPos = ApplyDySkyFogVert(v.vertex);
-#define DY_SKY_FOG_FRAG(IN, c) c.rgb = ApplyDySkyFogFrag(c, IN.dySkyFogPos);
+#define DY_SKY_FOG_FRAG(IN, c) c.rgb = ApplyDySkyFogFrag(c.rgb, 1.0, IN.dySkyFogPos);
+#define DY_SKY_FOG_FRAG_ALPHA(IN, c, a) c.rgb = ApplyDySkyFogFrag(c.rgb, a, IN.dySkyFogPos);
+#else
+#define DY_SKY_FOG_POS(idx)
+#define DY_SKY_FOG_VERT(v, o)
+#define DY_SKY_FOG_FRAG(IN, c)
+#define DY_SKY_FOG_FRAG_ALPHA(IN, c, a)
+#endif
 
 inline half4 ApplyDySkyFogVert(float4 vertex)
 {
@@ -62,7 +69,7 @@ inline half4 ApplyDySkyFogVert(float4 vertex)
     return o;
 }
 
-inline half3 ApplyDySkyFogFrag(half3 col, half4 dySkyFogPos)
+inline half3 ApplyDySkyFogFrag(half3 col, half alpha, half4 dySkyFogPos)
 {
     half disFog = saturate((dySkyFogPos.w - _DySky_unionDisFogParams.x) * _DySky_unionDisFogParams.y);
     disFog = 1.0 - disFog;
@@ -75,6 +82,7 @@ inline half3 ApplyDySkyFogFrag(half3 col, half4 dySkyFogPos)
     heightFog = 1.0 - heightFog;
 
     half3 fogCol = texCUBE(_DySky_texFogCubemap, normalize(dySkyFogPos.xyz)).rgb;
+    fogCol *= alpha;
     
     half fogFactor = saturate(disFog * _DySky_unionDisFogParams.z + heightFog * _DySky_unionHeightFogParams.z);
     return lerp(col, fogCol, fogFactor);

@@ -58,6 +58,16 @@ public class DySkyFogController : MonoBehaviour
             GameObject.DestroyImmediate(dynamicFogCubemap);
     }
 
+    private void OnEnable()
+    {
+        Shader.EnableKeyword("DY_SKY_FOG_ENABLE");
+    }
+
+    private void OnDisable()
+    {
+        Shader.DisableKeyword("DY_SKY_FOG_ENABLE");
+    }
+
     private void Start()
     {
         if (bakeType == BakeType.Static)

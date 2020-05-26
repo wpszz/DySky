@@ -64,6 +64,7 @@ MonoBehaviour:
   galaxyZ: 15
   fov: 60
   renderIntoRT: 0
+  ambientTrilight: 1
 --- !u!114 &204845586265603102
 MonoBehaviour:
   m_ObjectHideFlags: 0

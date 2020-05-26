@@ -40,18 +40,27 @@
 				OUT.pos = mul(_DySky_mMVP, float4(v.vertex.xyz, 1.0));
 
 				//half3 viewDir = normalize(mul((float3x3)unity_ObjectToWorld, v.vertex.xyz));
-				half3 viewDir	= v.vertex.xyz;
+				half3 viewDir = v.vertex.xyz;
 
 				float3x3 mSun = (float3x3)_DySky_mSunSpace;
-				half3 sunDir = -mSun[2];
-				OUT.sunMoonUV.xy = mul(mSun, v.vertex.xyz).xy * _DySky_tSunSize + 0.5;
-				half sunCosTheta = dot(viewDir, sunDir);
-				half sunrise = saturate(sunDir.y * 10.0);
-				half sunset = clamp(sunDir.y, 0.0, 0.5);
 
-				half3 moonDir = -sunDir;
-				float3x3 mMoon = float3x3(-mSun[0], mSun[1], mSun[2]);
-				OUT.sunMoonUV.zw = mul(mMoon, v.vertex.xyz).xy * _DySky_unionMoonPhaseSize.z + 0.5;
+				//OUT.sunMoonUV.xy = mul(transpose(mSun), v.vertex.xyz).xy * _DySky_tSunSize + 0.5;
+				OUT.sunMoonUV.xy = mul(v.vertex.xyz, mSun).xy * _DySky_tSunSize + 0.5;
+
+				//half3 sunDir = mul(mSun, half3(0, 0, 1));
+				half3 sunDir = half3(mSun._13, mSun._23, mSun._33);
+				half3 sunDirInv = -sunDir;
+				half sunCosTheta = dot(viewDir, sunDirInv);
+				half sunrise = saturate(sunDirInv.y * 10.0);
+				half sunset = clamp(sunDirInv.y, 0.0, 0.5);
+
+				//Inverse Sun-Space forward to Moon-Space
+				mSun._13 = -mSun._13, mSun._23 = -mSun._23, mSun._33 = -mSun._33;
+				OUT.sunMoonUV.zw = mul(v.vertex.xyz, mSun).xy * _DySky_unionMoonPhaseSize.z + 0.5;
+
+				half3 moonDirInv = -sunDirInv;
+				half moonCosTheta = dot(viewDir, moonDirInv);
+				half moonrise = saturate(moonDirInv.y * 10.0);
 
 				//Optical Depth.
 				//--------------------------------
@@ -89,11 +98,10 @@
 
 				//Moon Bright.
 				//--------------------------------
-				half  moonrise    = saturate(moonDir.y * 10.0);
-				half  bright      = 1.0 + dot(viewDir, -moonDir);
+				half  bright      = 1.0 - moonCosTheta;
 				half3 moonBright  = 1.0 / (1.0  + bright * _DySky_tMoonBrightRange) * _DySky_cMoonBright;
-				moonBright += 1.0 / (_DySky_tMoonEmissionIntensity  + bright * 200.0) * _DySky_cMoonEmission;
-				moonBright  = moonBright * moonrise;
+				moonBright += 1.0 / (_DySky_tMoonEmissionIntensity + bright * 200.0) * _DySky_cMoonEmission;
+				moonBright *= moonrise;
 
 				//Dynamic Clouds.
 				//--------------------------------
@@ -111,7 +119,7 @@
 				//Fade out skyline
 				half horizonExtinction = saturate(viewDir.y * 1000.0) * fex.b;
 
-				OUT.starPos = half4(mul((float3x3)_DySky_mStarfieldSpace, viewDir), pow(sin(viewDir.x * 1000 + _Time.w) * 0.5 + 0.5, 2.5));
+				OUT.starPos = half4(mul(viewDir, (float3x3)_DySky_mStarfieldSpace), pow(sin(viewDir.x * 1000 + _Time.w) * 0.5 + 0.5, 2.5));
 				OUT.skyColor = half4(inScatter + nightSky + moonBright, horizonExtinction);
 				OUT.attens = half3(fex.b, sunCosTheta, cloudPos.y);
 				return OUT;

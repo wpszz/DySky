@@ -1,0 +1,193 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &5653821914882651950
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5653821914882651951}
+  - component: {fileID: 5653821914882651945}
+  - component: {fileID: 5653821914882651944}
+  m_Layer: 0
+  m_Name: DySkydome
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5653821914882651951
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5653821914882651950}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 100, y: 100, z: 100}
+  m_Children: []
+  m_Father: {fileID: 5653821916138422137}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!33 &5653821914882651945
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5653821914882651950}
+  m_Mesh: {fileID: 4300000, guid: 2ea1864ab368a574e967b2d50eb2fdb8, type: 3}
+--- !u!23 &5653821914882651944
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5653821914882651950}
+  m_Enabled: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 0
+  m_MotionVectors: 2
+  m_LightProbeUsage: 0
+  m_ReflectionProbeUsage: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 27e9325b01eff354fa7931f964378b43, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 0
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+--- !u!1 &5653821916138422143
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5653821916138422137}
+  - component: {fileID: 5653821916138422136}
+  - component: {fileID: 5653821916138422139}
+  - component: {fileID: 5653821916138422138}
+  - component: {fileID: 5653821916138422116}
+  m_Layer: 0
+  m_Name: DySkyFogController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5653821916138422137
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5653821916138422143}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children:
+  - {fileID: 5653821914882651951}
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5653821916138422136
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5653821916138422143}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf9735671f312c44bacfa9f771871d8b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  transSkydome: {fileID: 5653821914882651951}
+  profile: {fileID: 11400000, guid: 042336c500cd7664da911957b25f367b, type: 2}
+  texSun: {fileID: 2800000, guid: 718213f00fc5ee845a5dae13284c187c, type: 3}
+  texMoon: {fileID: 2800000, guid: 024be912b7d681344a4907a43facd8bc, type: 3}
+  texCloudNoise: {fileID: 2800000, guid: 33a20b1b2417f6f498ba38400b81a498, type: 3}
+  texStarfield: {fileID: 8900000, guid: b0babfb83f81b364aa9310edc3bd27de, type: 3}
+  timeline: 10
+  longitude: 0
+  latitude: 0
+  sunScale: 1.2
+  moonScale: 1
+  moonPhaseX: 0.18
+  moonPhaseY: -0.1
+  moonPhaseW: 0
+  galaxyX: 30
+  galaxyY: 0
+  galaxyZ: 20
+  fov: 60
+  renderIntoRT: 0
+  ambientTrilight: 1
+--- !u!114 &5653821916138422139
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5653821916138422143}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a690fc991d2d52443842ca806a86b808, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  matFogBake: {fileID: 2100000, guid: 537b780c075a990488b6ef371c35df4d, type: 2}
+  staticFogCubemap: {fileID: 8900000, guid: 4e5a6475382afcc45a919a61bffb4dec, type: 3}
+  bakeType: 0
+  heightFogStart: 2
+  heightFogDistance: 10
+  heightFogDensity: 0.5
+  disFogStart: 5
+  disFogDistance: 30
+  disFogDensity: 1
+--- !u!114 &5653821916138422138
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5653821916138422143}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 299bb67f73738f048b5c1a2f0fb9c9f1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  speed: 1
+--- !u!114 &5653821916138422116
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5653821916138422143}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 857d7eb6e0e0f69478b7ed89f77a1544, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sunLight: {fileID: 0}

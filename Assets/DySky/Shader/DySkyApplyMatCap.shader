@@ -1,4 +1,4 @@
-﻿Shader "DySky/Fog/MatCap"
+﻿Shader "DySky/Opaque/MatCap"
 {
 	Properties
 	{
@@ -22,6 +22,7 @@
 			#pragma vertex vert
 			#pragma fragment frag
 			#pragma target 2.0
+			#pragma multi_compile __ DY_SKY_FOG_ENABLE
 
 			sampler2D _MainTex;
 			float4 _MainTex_ST;
