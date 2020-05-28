@@ -101,37 +101,31 @@
 				clip(texCol.a - _Cutoff);
 #endif
 				fixed3 albedo = texCol.rgb;
-				half3 lightDir = _WorldSpaceLightPos0.xyz;
-				half3 lightColor = _LightColor0.rgb;
 
 				// Unity shadow
 				fixed atten = UNITY_SHADOW_ATTENUATION(IN, IN.worldPos);
 
-				// Diffuse
-				fixed diff = max(0, dot(IN.worldNormal, lightDir));
-				fixed4 col = fixed4(0,0,0,1);
-				col.rgb += albedo * lightColor * diff * atten;
+				fixed4 col = fixed4(0, 0, 0, 1);
+
+				// Realtime diffuse
+#ifndef LIGHTMAP_ON
+				fixed diff = max(0, dot(IN.worldNormal, _WorldSpaceLightPos0.xyz));
+				col.rgb += albedo * _LightColor0.rgb * diff * atten;
+#endif
 
 				// GI
 #ifdef UNITY_LIGHT_FUNCTION_APPLY_INDIRECT
-				UnityGIInput giInput;
-				UNITY_INITIALIZE_OUTPUT(UnityGIInput, giInput);
-				giInput.light.dir = lightDir;
-				giInput.light.color = lightColor;
-				giInput.worldPos = IN.worldPos;
-				giInput.atten = atten;
 	#if defined(LIGHTMAP_ON)
-				giInput.lightmapUV.xy = IN.lmap;
+				half2 lmap = IN.lmap.xy;
 	#else
-				giInput.lightmapUV = 0.0;
+				half2 lmap = half2(0, 0);
 	#endif
 	#if UNITY_SHOULD_SAMPLE_SH && !UNITY_SAMPLE_FULL_SH_PER_PIXEL
-				giInput.ambient = IN.sh;
+				half3 ambient = IN.sh;
 	#else
-				giInput.ambient.rgb = 0.0;
+				half3 ambient = half3(0, 0, 0);
 	#endif
-				UnityGI gi = UnityGlobalIllumination(giInput, 1.0, IN.worldNormal);
-				col.rgb += albedo * gi.indirect.diffuse;
+				col.rgb += albedo * DySkyGI(atten, IN.worldPos, IN.worldNormal, ambient, lmap);
 #endif
 				// DySky Fog
 				DY_SKY_FOG_FRAG(IN, col)

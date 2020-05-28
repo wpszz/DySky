@@ -10,23 +10,21 @@ public class DySkySunLightSync : MonoBehaviour
     public Light sunLight;
 
     DySkyController skyController;
-    Transform sunTrans;
     private void Awake()
     {
+        skyController = this.GetComponent<DySkyController>();
         if (!sunLight)
         {
             this.enabled = false;
             return;
         }
-        skyController = this.GetComponent<DySkyController>();
-        sunTrans = sunLight.transform;
     }
 
     private void LateUpdate()
     {
         if (!sunLight) return;
 
-        sunTrans.forward = skyController.GetCurrentDirectionalLightForward();
+        sunLight.transform.forward = skyController.GetCurrentDirectionalLightForward();
         sunLight.color = skyController.GetCurrentDirectionalLightColor();
         sunLight.intensity = skyController.GetCurrentDirectionalLightIntensity();
 

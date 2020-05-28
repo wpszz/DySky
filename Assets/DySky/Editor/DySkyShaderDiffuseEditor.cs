@@ -1,16 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using UnityEditor;
-using UnityEngine.UI;
-using System;
-using System.IO;
-using System.Text;
-using System.Reflection;
 
-public class DySkyShaderDiffuseEditor : ShaderGUI
+public class DySkyShaderDiffuseEditor : DySkyShaderEditor
 {
-    const string DY_SKY_ALPHA_TEST_ON = "DY_SKY_ALPHA_TEST_ON";
-
     public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] properties)
     {
         Material material = materialEditor.target as Material;

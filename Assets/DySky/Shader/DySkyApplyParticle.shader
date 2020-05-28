@@ -1,10 +1,13 @@
-﻿Shader "DySky/Particles/Additive" 
+﻿Shader "DySky/Particles/Standard" 
 {
 	Properties 
 	{
 		_TintColor("Tint Color", Color) = (0.5,0.5,0.5,0.5)
 		_MainTex("Particle Texture", 2D) = "white" {}
 		_InvFade("Soft Particles Factor", Range(0.01,3.0)) = 1.0
+
+		[HideInInspector] _SrcBlend("__src", Float) = 1.0
+		[HideInInspector] _DstBlend("__dst", Float) = 0.0
 	}
 
 	CGINCLUDE
@@ -14,7 +17,7 @@
 	Category
 	{
 		Tags { "Queue" = "Transparent" "IgnoreProjector" = "True" "RenderType" = "Transparent" "PreviewType" = "Plane" }
-		Blend SrcAlpha One
+		Blend [_SrcBlend] [_DstBlend]
 		ColorMask RGB
 		Cull Off Lighting Off ZWrite Off
 
@@ -28,6 +31,7 @@
 				#pragma target 2.0
 				#pragma multi_compile_particles
 				#pragma multi_compile __ DY_SKY_FOG_ENABLE
+				#pragma shader_feature DY_SKY_PARTICLE_ADD DY_SKY_PARTICLE_ADD_SMOOTH DY_SKY_PARTICLE_BLEND
 
 				sampler2D _MainTex;
 				fixed4 _TintColor;
@@ -84,16 +88,31 @@
 					i.color.a *= fade;
 #endif
 
-					fixed4 col = 2.0f * i.color * _TintColor * tex2D(_MainTex, i.texcoord);
+					fixed4 col = _TintColor * i.color * tex2D(_MainTex, i.texcoord);
+#ifdef DY_SKY_PARTICLE_ADD
+					col *= 2.0f;
 					col.a = saturate(col.a); // alpha should not have double-brightness applied to it, but we can't fix that legacy behaior without breaking everyone's effects, so instead clamp the output to get sensible HDR behavior (case 967476)
 
 					// DySky Fog
-					DY_SKY_FOG_FRAG_ALPHA(i, col, 0.0) // fog towards black due to our blend mode
+					DY_SKY_FOG_FRAG_ALPHA(i, col, 0.0)  // fog towards black due to our blend mode
+#elif DY_SKY_PARTICLE_ADD_SMOOTH
+					col.rgb *= col.a;
+
+					// DySky Fog
+					DY_SKY_FOG_FRAG_ALPHA(i, col, 0.0); // fog towards black due to our blend mode
+#elif DY_SKY_PARTICLE_BLEND
+					col *= 2.0f;
+					col.a = saturate(col.a); // alpha should not have double-brightness applied to it, but we can't fix that legacy behaior without breaking everyone's effects, so instead clamp the output to get sensible HDR behavior (case 967476)
+
+					// DySky Fog
+					DY_SKY_FOG_FRAG_ALPHA(i, col, 1.0)
+#endif
 					return col;
 				}
 				ENDCG
 			}
 		}
 	}
+	CustomEditor "DySkyShaderParticleEditor"
 }
 

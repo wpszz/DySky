@@ -2,6 +2,8 @@
 #define DY_SKY_INCLUDED
 
 #include "UnityCG.cginc"
+#include "UnityStandardUtils.cginc"
+#include "UnityGlobalIllumination.cginc"
 
 uniform half		_DySky_kRayleigh;
 uniform half		_DySky_kMie;
@@ -86,6 +88,39 @@ inline half3 ApplyDySkyFogFrag(half3 col, half alpha, half4 dySkyFogPos)
     
     half fogFactor = saturate(disFog * _DySky_unionDisFogParams.z + heightFog * _DySky_unionHeightFogParams.z);
     return lerp(col, fogCol, fogFactor);
+}
+
+inline half3 DySkyGI(half atten, half3 worldPos, half3 normalWorld, half3 ambient, half2 lmap)
+{
+    half3 diffuse = half3(0, 0, 0);
+    
+#if UNITY_SHOULD_SAMPLE_SH
+    diffuse += ShadeSHPerPixel(normalWorld, ambient, worldPos);
+#endif
+
+#if defined(LIGHTMAP_ON)
+    // Baked lightmaps
+    half4 bakedColorTex = UNITY_SAMPLE_TEX2D(unity_Lightmap, lmap.xy);
+    half3 bakedColor = DecodeLightmap(bakedColorTex);
+
+    #ifdef DIRLIGHTMAP_COMBINED // directional lightmap, need add DIRLIGHTMAP_COMBINED to shader_feature or multi_compile
+        fixed4 bakedDirTex = UNITY_SAMPLE_TEX2D_SAMPLER (unity_LightmapInd, unity_Lightmap, data.lightmapUV.xy);
+        diffuse += DecodeDirectionalLightmap (bakedColor, bakedDirTex, normalWorld);
+    #else // non-directional lightmap
+        diffuse += bakedColor;
+    #endif
+    
+    #if defined(LIGHTMAP_SHADOW_MIXING) && !defined(SHADOWS_SHADOWMASK) && defined(SHADOWS_SCREEN)
+        diffuse = SubtractMainLightWithRealtimeAttenuationFromLightmap(diffuse, atten, bakedColorTex, normalWorld);
+    #else // simple shadow weakened
+        atten =  1.0 - atten;
+        atten *= atten;
+        atten *= atten;
+        atten = 1.0 - atten;
+        diffuse *= atten;
+    #endif
+#endif
+    return diffuse;
 }
 
 //--------------------------------
