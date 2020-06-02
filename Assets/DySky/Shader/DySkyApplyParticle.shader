@@ -34,7 +34,11 @@
 				#pragma shader_feature DY_SKY_PARTICLE_ADD DY_SKY_PARTICLE_ADD_SMOOTH DY_SKY_PARTICLE_BLEND
 
 				sampler2D _MainTex;
+				float4 _MainTex_ST;
 				fixed4 _TintColor;
+
+				UNITY_DECLARE_DEPTH_TEXTURE(_CameraDepthTexture);
+				half _InvFade;
 
 				struct appdata_t 
 				{
@@ -47,16 +51,14 @@
 				{
 					float4 vertex	: SV_POSITION;
 					fixed4 color	: COLOR;
-					float2 texcoord : TEXCOORD0;
+					half2 texcoord	: TEXCOORD0;
 
 #ifdef SOFTPARTICLES_ON
-					float4 projPos : TEXCOORD1;
+					half4 projPos	: TEXCOORD1;
 #endif
 
 					DY_SKY_FOG_POS(2)
 				};
-
-				float4 _MainTex_ST;
 
 				v2f vert(appdata_t v)
 				{
@@ -76,15 +78,12 @@
 					return o;
 				}
 
-				UNITY_DECLARE_DEPTH_TEXTURE(_CameraDepthTexture);
-				float _InvFade;
-
 				fixed4 frag(v2f i) : SV_Target
 				{
 #ifdef SOFTPARTICLES_ON
-					float sceneZ = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE_PROJ(_CameraDepthTexture, UNITY_PROJ_COORD(i.projPos)));
-					float partZ = i.projPos.z;
-					float fade = saturate(_InvFade * (sceneZ - partZ));
+					half sceneZ = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE_PROJ(_CameraDepthTexture, UNITY_PROJ_COORD(i.projPos)));
+					half partZ = i.projPos.z;
+					half fade = saturate(_InvFade * (sceneZ - partZ));
 					i.color.a *= fade;
 #endif
 

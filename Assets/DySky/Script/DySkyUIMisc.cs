@@ -5,8 +5,9 @@ using System.Collections;
 public class DySkyUIMisc : MonoBehaviour {
     public DySkyController controller;
     public Toggle toggleRenderIntoRT;
-    public DySkyFogController fogController;
     public Text textInfo;
+    public DySkyFogController fogController;
+    public DySkyWaterController waterController;
 
     void Start()
 	{
@@ -46,6 +47,13 @@ public class DySkyUIMisc : MonoBehaviour {
 
     public void OnFogBakeTypeChanged(Dropdown dropdown)
     {
-        fogController.bakeType = (DySkyFogController.BakeType)dropdown.value;
+        if (fogController)
+            fogController.bakeType = (DySkyFogController.BakeType)dropdown.value;
+    }
+
+    public void OnWaterQualityChanged(Dropdown dropdown)
+    {
+        if (waterController)
+            waterController.SetQualityLevel((DySkyWaterController.Quality)dropdown.value);
     }
 }

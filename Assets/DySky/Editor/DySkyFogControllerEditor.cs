@@ -52,7 +52,8 @@ public class DySkyFogControllerEditor : Editor
         Shader diffuse = Shader.Find("DySky/Opaque/Diffuse");
         Shader matcap = Shader.Find("DySky/Opaque/MatCap");
         Shader particle = Shader.Find("DySky/Particles/Standard");
-       
+        Shader water = Shader.Find("DySky/Water/Standard");
+
         foreach (GameObject go in Resources.FindObjectsOfTypeAll<GameObject>())
         {
             foreach (Renderer r in go.GetComponentsInChildren<Renderer>(true))
@@ -103,6 +104,10 @@ public class DySkyFogControllerEditor : Editor
                             {
                                 DySkyShaderParticleEditor.SetupMaterialWithBlendMode(mat, DySkyShaderParticleEditor.BlendMode.Additive);
                             }
+                        }
+                        else if (name.Contains("Water") && mat.shader != water)
+                        {
+                            mat.shader = water;
                         }
                     }
                 }

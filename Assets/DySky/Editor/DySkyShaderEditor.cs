@@ -13,5 +13,6 @@ public abstract class DySkyShaderEditor : ShaderGUI
     public const string DY_SKY_MATCAP_MASK          = "DY_SKY_MATCAP_MASK";
     public const string DY_SKY_MATCAP_MASK_BLEND    = "DY_SKY_MATCAP_MASK_BLEND";
 
+    public const string DY_SKY_FOAM_EDGE_ENABLE     = "DY_SKY_FOAM_EDGE_ENABLE";
     
 }
