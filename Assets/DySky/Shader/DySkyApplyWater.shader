@@ -14,7 +14,7 @@
 		_BaseColor("Base color", COLOR) = (0.3820755, 0.7432312, .99, 0.5)
 		_SpecularColor("Specular Reflection", COLOR) = (1.0, 1.0, 1.0, 0.5)
 		_FresnelColor("Freshnel Reflection", COLOR) = (1.0, 1.0, 1.0, 0.8)
-		_DistortionStrength("Distortion Strength", Range(0.01,0.4)) = 0.1
+		_DistortionStrength("Distortion Strength", Range(0.01,2.0)) = 0.3
 
 		_EdgeInvFade("Edge Soft Factor", Range(0.01,10.0)) = 1.0
 		[NoScaleOffset]
@@ -143,15 +143,15 @@
 	SubShader
 	{
 		Tags{ "RenderType" = "Transparent" "Queue" = "Transparent" "LightMode" = "ForwardBase" }
-			Blend SrcAlpha OneMinusSrcAlpha
-			ZTest LEqual
-			ZWrite Off
-			Cull Off
-			LOD 400
+		Blend SrcAlpha OneMinusSrcAlpha
+		ZTest LEqual
+		ZWrite Off
+		Cull Off
+		LOD 400
 
-			GrabPass{ "_DySkyGrabTexture" }
+		GrabPass{ "_DySkyGrabTexture" }
 
-			Pass
+		Pass
 		{
 			CGPROGRAM
 			#pragma vertex vert

@@ -108,6 +108,7 @@ public class DySkyFogControllerEditor : Editor
                         else if (name.Contains("Water") && mat.shader != water)
                         {
                             mat.shader = water;
+                            r.gameObject.AddComponent<DySkyWaterController>().SetSharedMaterial(mat);
                         }
                     }
                 }

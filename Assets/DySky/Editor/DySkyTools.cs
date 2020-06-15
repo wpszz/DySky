@@ -15,9 +15,12 @@ public static class DySkyTools
     const float InvTwoPI = 1.0f / TwoPI;
     const float InvHalfPI = 1.0f / HalfPI;
 
-    [MenuItem("Tools/DySky/Gen atan2 LUT", false, 301)]
+    [MenuItem("Tools/DySky/Lut/atan2", false, 301)]
     public static void GenAtan2LUT()
     {
+        string file = EditorUtility.SaveFilePanel("save file", "", "ATAN2_LUT", "jpg");
+        if (string.IsNullOrEmpty(file)) return;
+
         const int width = 512;
         const int height = 512;
         const float invW = 1.0f / width;
@@ -36,11 +39,10 @@ public static class DySkyTools
                 tex.SetPixel(i, height - j - 1, new Color(phi01, theta01, hemi_theta01));
             }
         tex.Apply();
+
         byte[] bytes = tex.EncodeToJPG();
         GameObject.DestroyImmediate(tex);
-        string file = EditorUtility.SaveFilePanel("save file", "", "Sky_LUT_ATAN2", "jpg");
-        if (!string.IsNullOrEmpty(file))
-            File.WriteAllBytes(file, bytes);
+        File.WriteAllBytes(file, bytes);
 
         /*
 				half phi = atan2(eyeRay.z, eyeRay.x);
@@ -48,6 +50,33 @@ public static class DySkyTools
 				half2 uvSphere = half2(phi * UNITY_INV_PI * 0.5 + 0.5, theta * UNITY_INV_PI + 0.5);
 				half2 uvHemisphere = half2(uvSphere.x, theta * UNITY_INV_HALF_PI);
          */
+    }
+
+    [MenuItem("Tools/DySky/Lut/BRDF", false, 302)]
+    public static void GenBRDFLUT()
+    {
+        string file = EditorUtility.SaveFilePanel("save file", "", "BRDF_LUT", "exr");
+        if (string.IsNullOrEmpty(file)) return;
+
+        Shader brdf = Shader.Find("DySky/Lut/EnvBRDF");
+
+        const int SIZE = 64;
+
+        Material mat = new Material(brdf);
+        RenderTexture rt = RenderTexture.GetTemporary(SIZE, SIZE, 0, RenderTextureFormat.ARGBFloat);
+        Graphics.Blit(null, rt, mat);
+        UnityEngine.Object.DestroyImmediate(mat);
+
+        Texture2D lutTex = new Texture2D(SIZE, SIZE, TextureFormat.RGBAFloat, true, true);
+        Graphics.SetRenderTarget(rt);
+        lutTex.ReadPixels(new Rect(0, 0, SIZE, SIZE), 0, 0);
+        lutTex.Apply();
+        Graphics.SetRenderTarget(null);
+        RenderTexture.ReleaseTemporary(rt);
+
+        byte[] bytes = lutTex.EncodeToEXR(Texture2D.EXRFlags.OutputAsFloat);
+        UnityEngine.Object.DestroyImmediate(lutTex);
+        File.WriteAllBytes(file, bytes);
     }
 
     struct Vertex
@@ -354,7 +383,8 @@ public static class DySkyTools
                 tex.SetPixel(rndX, rndY, Color.white * intensity);
             }
         tex.Apply();
-        File.WriteAllBytes(file, tex.EncodeToJPG());
+        byte[] bytes = tex.EncodeToJPG();
+        UnityEngine.Object.DestroyImmediate(tex);
+        File.WriteAllBytes(file, bytes);
     }
-
 }

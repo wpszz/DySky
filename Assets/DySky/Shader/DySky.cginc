@@ -42,9 +42,13 @@ uniform half		_DySky_tExposure;
 uniform float4x4	_DySky_mMVP;
 
 uniform samplerCUBE _DySky_texFogCubemap;
+#ifdef __DY_SKY_FOG_FORMULA_OPTIMIZE_QUADRATIC
+uniform half4       _DySky_unionFogCoef;          // x:coef1 y:coef2 z:coef3 w:coef4
+uniform half        _DySky_unionFogConstant;      // constant
+#else
 uniform half4       _DySky_unionHeightFogParams;  // x:start y:1/dis z:density w:unused
 uniform half4       _DySky_unionDisFogParams;     // x:start y:1/dis z:density w:unused
-
+#endif
 
 #define __DySky_RayleighWavelength half3(0.00519673, 0.0121427, 0.0296453) * _DySky_tRayleigh
 #define __DySky_MieWavelength half3(0.005721017, 0.004451339, 0.003146905) * _DySky_tMie
@@ -73,23 +77,34 @@ inline half4 ApplyDySkyFogVert(float4 vertex)
 
 inline half3 ApplyDySkyFogFrag(half3 col, half alpha, half4 dySkyFogPos)
 {
+#ifdef __DY_SKY_FOG_FORMULA_OPTIMIZE_QUADRATIC   
+    half3 fogCol = texCUBE(_DySky_texFogCubemap, dySkyFogPos.xyz).rgb;
+    fogCol *= alpha;
+        
+    half fogFactor = dot(_DySky_unionFogCoef, half4(dySkyFogPos.y * dySkyFogPos.y, dySkyFogPos.y, dySkyFogPos.w * dySkyFogPos.w, dySkyFogPos.w));
+    fogFactor += _DySky_unionFogConstant;
+    
+    return lerp(col, fogCol, saturate(fogFactor));
+#else
+    half heightFog = saturate((-dySkyFogPos.y - _DySky_unionHeightFogParams.x) * _DySky_unionHeightFogParams.y);
+    heightFog = 1.0 - heightFog;
+    heightFog *= heightFog;
+    heightFog = 1.0 - heightFog;
+    
     half disFog = saturate((dySkyFogPos.w - _DySky_unionDisFogParams.x) * _DySky_unionDisFogParams.y);
     disFog = 1.0 - disFog;
     disFog *= disFog;
     disFog = 1.0 - disFog;
 
-    half heightFog = saturate((-dySkyFogPos.y - _DySky_unionHeightFogParams.x) * _DySky_unionHeightFogParams.y);
-    heightFog = 1.0 - heightFog;
-    heightFog *= heightFog;
-    heightFog = 1.0 - heightFog;
-
-    half3 fogCol = texCUBE(_DySky_texFogCubemap, normalize(dySkyFogPos.xyz)).rgb;
+    half3 fogCol = texCUBE(_DySky_texFogCubemap, dySkyFogPos.xyz).rgb;
     fogCol *= alpha;
     
     half fogFactor = saturate(disFog * _DySky_unionDisFogParams.z + heightFog * _DySky_unionHeightFogParams.z);
     return lerp(col, fogCol, fogFactor);
+#endif    
 }
 
+// GI indirect diffuse color(from SH) + LightMap(from baking)
 inline half3 DySkyGI(half atten, half3 worldPos, half3 normalWorld, half3 ambient, half2 lmap)
 {
     half3 diffuse = half3(0, 0, 0);
@@ -122,6 +137,27 @@ inline half3 DySkyGI(half atten, half3 worldPos, half3 normalWorld, half3 ambien
 #endif
     return diffuse;
 }
+
+// GI indirect specular color(from IBL)
+inline half3 DySkyGI_IndirectSpecular(half3 normalWorld, half3 worldViewDir, half roughness)
+{
+#ifdef _GLOSSYREFLECTIONS_OFF    
+    // simple indirect specular
+    return unity_IndirectSpecColor.rgb;
+#else
+    // ref: UnityGlobalIllumination.cginc and UnityImageBasedLighting.cginc
+    half3 reflUVW = reflect(-worldViewDir, normalWorld);
+    half perceptualRoughness = roughness * (1.7 - 0.7 * roughness);
+    half mip = perceptualRoughnessToMipmapLevel(perceptualRoughness);
+    half4 rgbm = UNITY_SAMPLE_TEXCUBE_LOD(unity_SpecCube0, reflUVW, mip);
+    return DecodeHDR(rgbm, unity_SpecCube0_HDR);
+#endif    
+}
+
+// Force handles shadows in the depths of the GI function for performance reasons
+#ifndef HANDLE_SHADOWS_BLENDING_IN_GI
+    #define HANDLE_SHADOWS_BLENDING_IN_GI 1
+#endif
 
 //--------------------------------
 inline float4 DepthToWorld(float depth, float2 uv, float4x4 inverseViewMatrix)

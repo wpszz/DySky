@@ -46,6 +46,12 @@ public class DySkyWaterController : MonoBehaviour
         SetupWaterKeys(sharedMaterial, quality);
     }
 
+    public void SetSharedMaterial(Material material)
+    {
+        this.sharedMaterial = material;
+        SetupWaterKeys(sharedMaterial, quality);
+    }
+
     private static void SetupWaterKeys(Material material, Quality quality)
     {
         if (!material || !material.shader) return;

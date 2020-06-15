@@ -165,6 +165,7 @@ MonoBehaviour:
   disFogStart: 5
   disFogDistance: 30
   disFogDensity: 1
+  mipmap: 0
 --- !u!114 &5653821916138422138
 MonoBehaviour:
   m_ObjectHideFlags: 0

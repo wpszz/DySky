@@ -95,7 +95,7 @@
 				o.sh = ShadeSHPerVertex(o.worldNormal, o.sh);
 #endif
 
-				UNITY_TRANSFER_SHADOW(o, v.texcoord1.xy); // coord used by SHADOWS_SHADOWMASK
+				UNITY_TRANSFER_SHADOW(o, v.texcoord1.xy);
 
 				DY_SKY_FOG_VERT(v, o)
 				return o;

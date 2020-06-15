@@ -34,6 +34,8 @@ public class DySkyFogController : MonoBehaviour
     [Range(0f, 2f)]
     public float disFogDensity = 1f;
 
+    public bool mipmap = false;
+
     DySkyController skyController;
     Cubemap dynamicFogCubemap;
 
@@ -43,8 +45,13 @@ public class DySkyFogController : MonoBehaviour
     {
         internal static readonly int _DySky_texFogCubemap           = Shader.PropertyToID("_DySky_texFogCubemap");
 
+#if __DY_SKY_FOG_FORMULA_OPTIMIZE_QUADRATIC
+        internal static readonly int _DySky_unionFogCoef            = Shader.PropertyToID("_DySky_unionFogCoef");
+        internal static readonly int _DySky_unionFogConstant        = Shader.PropertyToID("_DySky_unionFogConstant");
+#else
         internal static readonly int _DySky_unionHeightFogParams    = Shader.PropertyToID("_DySky_unionHeightFogParams");
         internal static readonly int _DySky_unionDisFogParams       = Shader.PropertyToID("_DySky_unionDisFogParams");
+#endif
     }
 
     private void Awake()
@@ -88,16 +95,28 @@ public class DySkyFogController : MonoBehaviour
                 BakeFogCubeMap();
             }
         }
-
+#if __DY_SKY_FOG_FORMULA_OPTIMIZE_QUADRATIC
+        float a1 = heightFogStart;
+        float b1 = 1f / heightFogDistance;
+        float c1 = a1 * b1 + 1.0f;
+        float d1 = heightFogDensity;
+        float a2 = disFogStart;
+        float b2 = 1f / disFogDistance;
+        float c2 = a2 * b2 + 1.0f;
+        float d2 = disFogDensity;
+        Shader.SetGlobalVector(Uniforms._DySky_unionFogCoef, new Vector4(-b1 * b1 * d1, -2.0f * b1 * c1 * d1, -b2 * b2 * d2, 2.0f * b2 * c2 * d2));
+        Shader.SetGlobalFloat(Uniforms._DySky_unionFogConstant, (1.0f - c1 * c1) * d1 + (1.0f - c2 * c2) * d2);
+#else
         Shader.SetGlobalVector(Uniforms._DySky_unionHeightFogParams, new Vector4(heightFogStart, 1f / heightFogDistance, heightFogDensity, 0f));
         Shader.SetGlobalVector(Uniforms._DySky_unionDisFogParams, new Vector4(disFogStart, 1f / disFogDistance, disFogDensity, 0f));
+#endif
     }
 
     public void BakeFogCubeMap()
     {
         if (!dynamicFogCubemap)
         {
-            dynamicFogCubemap = new Cubemap(128, TextureFormat.ARGB32, false);
+            dynamicFogCubemap = new Cubemap(128, TextureFormat.ARGB32, mipmap);
             Shader.SetGlobalTexture(Uniforms._DySky_texFogCubemap, dynamicFogCubemap);
         }
         BakeFogCubeMap(dynamicFogCubemap);
@@ -135,6 +154,11 @@ public class DySkyFogController : MonoBehaviour
         Camera.main.depthTextureMode = oldDTM;
         Camera.main.cullingMask = oldCM;
         return success;
+    }
+
+    public Cubemap GetCurrentCubeMap()
+    {
+        return dynamicFogCubemap ? dynamicFogCubemap : staticFogCubemap;
     }
 
     /*
