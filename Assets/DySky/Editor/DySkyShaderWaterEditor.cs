@@ -11,9 +11,30 @@ public class DySkyShaderWaterEditor : DySkyShaderEditor
     {
         Material material = materialEditor.target as Material;
 
+        MaterialProperty waveTiling = FindProperty("_WaveTiling", properties);
+        MaterialProperty waveSpeed = FindProperty("_WaveSpeed", properties);
+
         MaterialProperty foamProp = FindProperty("_EdgeFoamTex", properties);
         MaterialProperty foamFreqProp = FindProperty("_EdgeFoamFreq", properties);
         foreach (var prop in properties) {
+            if (prop == waveTiling)
+            {
+                float tilingScale = EditorGUILayout.Slider(waveTiling.displayName, waveTiling.vectorValue.x, 0.1f, 5f);
+                if (tilingScale != waveTiling.vectorValue.x)
+                {
+                    waveTiling.vectorValue = new Vector4(1f, 1f, -1f, 1f) * tilingScale;
+                }
+                continue;
+            }
+            if (prop == waveSpeed)
+            {
+                float speedScale = EditorGUILayout.Slider(waveSpeed.displayName, waveSpeed.vectorValue.x, -5f, 5f);
+                if (speedScale != waveSpeed.vectorValue.x)
+                {
+                    waveSpeed.vectorValue = new Vector4(1f, 1f, -1f, 1f) * speedScale;
+                }
+                continue;
+            }
             if (prop == foamProp || prop == foamFreqProp)
             {
                 bool foam = material.IsKeywordEnabled(DY_SKY_FOAM_EDGE_ENABLE);

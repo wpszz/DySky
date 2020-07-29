@@ -4,8 +4,7 @@
 	{
 		[NoScaleOffset]
 		_WaveTex("Wave Texture (RGB)", 2D) = "white" {}
-		_WaveTiling("Wave Tiling", Vector) = (2.0 ,2.0, -2.0, 2.0)
-		_WaveTilingScale("Wave Tiling Scale", Range(0.1, 5.0)) = 1.0
+		_WaveTiling("Wave Tiling", Vector) = (1.0 ,1.0, -1.0, 1.0)
 		_WaveSpeed("Wave Speed", Vector) = (1.0 ,1.0, -1.0, 1.0)
 		_WaveStrength("Wave Strength", Range(0.5, 3.0)) = 1.0
 		_SpecularPower("Specular Power", Range(5.0, 200.0)) = 100.0
@@ -27,7 +26,6 @@
 
 	sampler2D _WaveTex;
 	half4 _WaveTiling;
-	half _WaveTilingScale;
 	half4 _WaveSpeed;
 	half _WaveStrength;
 	half _SpecularPower;
@@ -74,8 +72,13 @@
 
 		half3 worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
 
-		o.uv = (worldPos.xzxz + _Time.xxxx * _WaveSpeed) * _WaveTiling * _WaveTilingScale;
+		o.uv = (worldPos.xzxz + _Time.xxxx * _WaveSpeed) * _WaveTiling;
 		o.viewDir = worldPos - _WorldSpaceCameraPos;
+
+		// disappear repeated pattern
+		half2x2 rot = half2x2(0.7, -0.5, 0.5, 0.7);
+		o.uv.xy = mul(rot, o.uv.xy);
+		o.uv.zw = mul(rot, o.uv.zw);
 
 #ifdef DY_SKY_SOFT_EDGE_ENABLE
 		o.projPos = ComputeScreenPos(o.vertex);
@@ -113,7 +116,13 @@
 		half ndoth = max(0, dot(normal, h));
 		half specular = pow(ndoth, _SpecularPower);
 
+#if 0
+		// over water only
 		half ndotv = max(0, dot(normal * half3(_FresnelScale, 1, _FresnelScale), viewDir));
+#else
+		// over and under water
+		half ndotv = abs(dot(normal * half3(_FresnelScale, 1, _FresnelScale), viewDir));
+#endif
 		half fresnel = pow(1.0 - ndotv, _FresnelPower);
 
 		half4 col = _SpecularColor * specular * _LightColor0;
@@ -122,8 +131,16 @@
 #ifdef DY_SKY_SOFT_EDGE_ENABLE
 		half sceneZ = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE_PROJ(_CameraDepthTexture, UNITY_PROJ_COORD(i.projPos)));
 		half partZ = i.projPos.z;
+	#if 0
+		// soft edge of water surface which is closed to eyes
+		half fade = saturate(min(smoothstep(0.3, 0.35, partZ), _EdgeInvFade * (sceneZ - partZ)));
+		fade += sin(normal.y * 60.0 + _Time.y * 2.0) * 0.04 - 0.04;
+		col.rgb = lerp(_LightColor0, col.rgb, smoothstep(0.05, 0.2, fade));
+		col.a *= smoothstep(0.0, 0.05, fade);
+	#else
 		half fade = saturate(_EdgeInvFade * (sceneZ - partZ));
 		col.a *= fade;
+	#endif
 
 	#ifdef DY_SKY_FOAM_EDGE_ENABLE
 		half foam = tex2D(_EdgeFoamTex, half2(pow(fade, _EdgeFoamFreq) + _Time.y * 0.2, 0.5) + normal.xy * 0.15).r;
@@ -131,6 +148,15 @@
 		col.a += smoothstep(0.2, 0.5, min(fade, foam));
 		col.rgb += _LightColor0 * foam;
 	#endif
+
+	#if 0
+		// soft edge of water surface which is closed to eyes
+		half d = 1.0 - LinearEyeDepth(partZ);
+		d += sin(i.viewDir.x * 20.0 + _Time.y * 2.0) * 0.02 - 0.02;
+		col.rgb = lerp(half3(0, 0, 0), col.rgb, smoothstep(0.05, 0.09, d));
+		col.a *= smoothstep(0.0, 0.05, d);
+	#endif
+
 #endif
 
 		// DySky Fog

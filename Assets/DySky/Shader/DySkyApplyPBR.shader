@@ -194,7 +194,7 @@
 				half3 diffuse = albedo * oneMinusReflectivity;
 
 				half3 worldPos = half3(IN.tSpace0.w, IN.tSpace1.w, IN.tSpace2.w);
-				half3 worldNormal = half3(dot(IN.tSpace0.xyz, normal), dot(IN.tSpace1.xyz, normal), dot(IN.tSpace2.xyz, normal));
+				half3 worldNormal = normalize(half3(dot(IN.tSpace0.xyz, normal), dot(IN.tSpace1.xyz, normal), dot(IN.tSpace2.xyz, normal)));
 				half3 worldViewDir = normalize(UnityWorldSpaceViewDir(worldPos));
 				half3 worldLightDir = _WorldSpaceLightPos0.xyz;
 
