@@ -23,6 +23,7 @@ uniform sampler2D	_DySky_texSun;
 uniform sampler2D	_DySky_texMoon;
 uniform sampler2D	_DySky_texCloudNoise;
 uniform samplerCUBE _DySky_texStarfield;
+uniform samplerCUBE _DySky_texReflectSky;
 
 uniform float4x4	_DySky_mSunSpace;
 uniform half		_DySky_tSunSize;

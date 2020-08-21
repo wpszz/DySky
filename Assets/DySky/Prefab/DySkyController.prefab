@@ -65,6 +65,9 @@ MonoBehaviour:
   fov: 60
   renderIntoRT: 0
   ambientTrilight: 1
+  texStaticReflectSky: {fileID: 0}
+  matBake: {fileID: 0}
+  bakeType: 0
 --- !u!114 &204845586265603102
 MonoBehaviour:
   m_ObjectHideFlags: 0

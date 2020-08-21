@@ -58,6 +58,19 @@ public class DySkyController : MonoBehaviour
     [Space(10)]
     public bool ambientTrilight = true;
 
+    public enum BakeType
+    {
+        Static = 0,
+        EveryFrame = 1,
+        EverySecond = 2,
+    }
+    [Space(10)]
+    public Cubemap texStaticReflectSky;
+    public Material matBake;
+    public BakeType bakeType = BakeType.Static;
+    Cubemap dynamicSkyCubemap;
+    float prevBakeTime = -1;
+
     const float Inv24 = 1f / 24f;
     const float LongitudePerHour = 24f / 360f;
 
@@ -81,6 +94,7 @@ public class DySkyController : MonoBehaviour
         internal static readonly int _DySky_texMoon                 = Shader.PropertyToID("_DySky_texMoon");
         internal static readonly int _DySky_texCloudNoise           = Shader.PropertyToID("_DySky_texCloudNoise");
         internal static readonly int _DySky_texStarfield            = Shader.PropertyToID("_DySky_texStarfield");
+        internal static readonly int _DySky_texReflectSky           = Shader.PropertyToID("_DySky_texReflectSky");
 
         internal static readonly int _DySky_mSunSpace               = Shader.PropertyToID("_DySky_mSunSpace");
         internal static readonly int _DySky_tSunSize                = Shader.PropertyToID("_DySky_tSunSize");
@@ -121,6 +135,14 @@ public class DySkyController : MonoBehaviour
         Shader.SetGlobalTexture(Uniforms._DySky_texMoon, texMoon);
         Shader.SetGlobalTexture(Uniforms._DySky_texCloudNoise, texCloudNoise);
         Shader.SetGlobalTexture(Uniforms._DySky_texStarfield, texStarfield);
+        if (bakeType == BakeType.Static)
+            Shader.SetGlobalTexture(Uniforms._DySky_texReflectSky, texStaticReflectSky);        
+    }
+
+    private void OnDestroy()
+    {
+        if (dynamicSkyCubemap)
+            GameObject.DestroyImmediate(dynamicSkyCubemap);
     }
 
     private void LateUpdate()
@@ -131,6 +153,7 @@ public class DySkyController : MonoBehaviour
         UpdateSkydomePos();
         UpdateDySkyUniforms(progress01, utcTime24);
         UpdateEnvironmentLighting(progress01, utcTime24);
+        UpdateSkyBake();
     }
 
     private void UpdateSkydomePos()
@@ -190,7 +213,7 @@ public class DySkyController : MonoBehaviour
             P = GL.GetGPUProjectionMatrix(P, true);
 #else
             // fixed matrix issue for render into RT mode(affected by Image Effect[OnRenderImage])
-            P = GL.GetGPUProjectionMatrix(P, renderIntoRT || QualitySettings.antiAliasing > 0);
+            P = GL.GetGPUProjectionMatrix(P, renderIntoRT || QualitySettings.antiAliasing > 0 || DySkyPreFrameBuffers.IsEnable(Camera.main));
 #endif
             Shader.SetGlobalMatrix(Uniforms._DySky_mMVP, P * V * M);
         }
@@ -211,6 +234,22 @@ public class DySkyController : MonoBehaviour
             RenderSettings.ambientLight = profile.gradEnvAmbient.Evaluate(progress01);
         }
         RenderSettings.ambientIntensity = profile.curveEnvAmbientIntensity.Evaluate(timeline24);
+    }
+
+    private void UpdateSkyBake()
+    {
+        if (bakeType != BakeType.Static)
+        {
+            if (bakeType == BakeType.EveryFrame)
+            {
+                BakeSkyCubeMap();
+            }
+            else if (bakeType == BakeType.EverySecond && Time.time - prevBakeTime > 1.0f)
+            {
+                prevBakeTime = Time.time;
+                BakeSkyCubeMap();
+            }
+        }
     }
 
     public float GetCurrentUTCTime24()
@@ -243,5 +282,54 @@ public class DySkyController : MonoBehaviour
     public float GetCurrentDirectionalLightIntensity()
     {
         return profile.curveMainLightIntensity.Evaluate(GetCurrentUTCTime24());
+    }
+
+    public void BakeSkyCubeMap()
+    {
+        if (!dynamicSkyCubemap)
+        {
+            dynamicSkyCubemap = new Cubemap(128, TextureFormat.ARGB32, false);
+            Shader.SetGlobalTexture(Uniforms._DySky_texReflectSky, dynamicSkyCubemap);
+        }
+        BakeSkyCubeMap(dynamicSkyCubemap);
+    }
+
+    public bool BakeSkyCubeMap(Cubemap cubemap)
+    {
+        if (!matBake) return false;
+        if (!cubemap) return false;
+        if (!Camera.main) return false;
+
+        const int layer_temp = 31;
+
+        MeshRenderer skydomeMR = transSkydome.GetComponent<MeshRenderer>();
+
+        int oldLayer = transSkydome.gameObject.layer;
+        Material oldMat = skydomeMR.sharedMaterial;
+
+        Camera bakeCamera = new GameObject("DySkyBakeFogCamera").AddComponent<Camera>();
+        bakeCamera.CopyFrom(Camera.main);
+        bakeCamera.enabled = false;
+        bakeCamera.depthTextureMode = DepthTextureMode.None;
+        bakeCamera.cullingMask = 1 << layer_temp;
+
+        transSkydome.gameObject.layer = layer_temp;
+        skydomeMR.sharedMaterial = matBake;
+
+        bool success = false;
+        try
+        {
+            bakeCamera.RenderToCubemap(cubemap);
+            success = true;
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError(e);
+        }
+        skydomeMR.sharedMaterial = oldMat;
+        transSkydome.gameObject.layer = oldLayer;
+
+        GameObject.DestroyImmediate(bakeCamera.gameObject);
+        return success;
     }
 }

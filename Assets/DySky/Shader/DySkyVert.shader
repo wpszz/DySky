@@ -18,6 +18,7 @@
 			CGPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
+			#pragma shader_feature DY_SKY_BAKE_MODE
 
 			struct appdata_t {
 				float4 vertex : POSITION;
@@ -36,8 +37,11 @@
 				v2f OUT;
 				UNITY_SETUP_INSTANCE_ID(v);
 
-				//OUT.pos = UnityObjectToClipPos(v.vertex);
+			#ifdef DY_SKY_BAKE_MODE
+				OUT.pos = UnityObjectToClipPos(v.vertex);
+			#else
 				OUT.pos = mul(_DySky_mMVP, float4(v.vertex.xyz, 1.0));
+			#endif
 
 				//half3 viewDir = normalize(mul((float3x3)unity_ObjectToWorld, v.vertex.xyz));
 				half3 viewDir = v.vertex.xyz;
@@ -183,4 +187,5 @@
 	}
 
 	Fallback Off
+	CustomEditor "DySkyShaderVertEditor"
 }

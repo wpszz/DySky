@@ -7,40 +7,61 @@ public class DySkyShaderWaterEditor : DySkyShaderEditor
 {
     MaterialProperty[] emptyProps = new MaterialProperty[0];
 
+    public override void AssignNewShaderToMaterial(Material material, Shader oldShader, Shader newShader)
+    {
+        base.AssignNewShaderToMaterial(material, oldShader, newShader);
+
+        Texture texWave= material.GetTexture("_WaveTex");
+        if (!texWave)
+        {
+            string shaderLocation = AssetDatabase.GetAssetPath(newShader);
+            string assetLocation = shaderLocation.Replace("/Shader/DySkyApplyWater.shader", "/Texture/Wave.psd");
+            texWave = AssetDatabase.LoadAssetAtPath(assetLocation, typeof(Texture)) as Texture;
+            material.SetTexture("_WaveTex", texWave);
+        }
+
+        Texture texFoam = material.GetTexture("_EdgeFoamTex");
+        if (!texFoam)
+        {
+            string shaderLocation = AssetDatabase.GetAssetPath(newShader);
+            string assetLocation = shaderLocation.Replace("/Shader/DySkyApplyWater.shader", "/Texture/FoamGrad.bmp");
+            texWave = AssetDatabase.LoadAssetAtPath(assetLocation, typeof(Texture)) as Texture;
+            material.SetTexture("_EdgeFoamTex", texWave);
+        }
+
+        material.EnableKeyword(DY_SKY_FOAM_EDGE_ENABLE);
+    }
+
     public override void OnGUI(MaterialEditor materialEditor, MaterialProperty[] properties)
     {
         Material material = materialEditor.target as Material;
 
-        MaterialProperty waveTiling = FindProperty("_WaveTiling", properties);
-        MaterialProperty waveSpeed = FindProperty("_WaveSpeed", properties);
-
+        MaterialProperty reflectColor = FindProperty("_ReflectColor", properties);
         MaterialProperty foamProp = FindProperty("_EdgeFoamTex", properties);
-        MaterialProperty foamFreqProp = FindProperty("_EdgeFoamFreq", properties);
+        MaterialProperty foamScaleProp = FindProperty("_EdgeFoamScale", properties);
         foreach (var prop in properties) {
-            if (prop == waveTiling)
+            if (prop == reflectColor)
             {
-                float tilingScale = EditorGUILayout.Slider(waveTiling.displayName, waveTiling.vectorValue.x, 0.1f, 5f);
-                if (tilingScale != waveTiling.vectorValue.x)
+                bool reflectSky = EditorGUILayout.Toggle("Reflect DySky", material.IsKeywordEnabled(DY_SKY_REFLECT_SKY));
+                if (reflectSky != material.IsKeywordEnabled(DY_SKY_REFLECT_SKY))
                 {
-                    waveTiling.vectorValue = new Vector4(1f, 1f, -1f, 1f) * tilingScale;
+                    if (reflectSky)
+                    {
+                        material.EnableKeyword(DY_SKY_REFLECT_SKY);
+                    }
+                    else
+                    {
+                        material.DisableKeyword(DY_SKY_REFLECT_SKY);
+                    }
                 }
-                continue;
+                if (reflectSky) continue;
             }
-            if (prop == waveSpeed)
-            {
-                float speedScale = EditorGUILayout.Slider(waveSpeed.displayName, waveSpeed.vectorValue.x, -5f, 5f);
-                if (speedScale != waveSpeed.vectorValue.x)
-                {
-                    waveSpeed.vectorValue = new Vector4(1f, 1f, -1f, 1f) * speedScale;
-                }
-                continue;
-            }
-            if (prop == foamProp || prop == foamFreqProp)
+            else if (prop == foamProp || prop == foamScaleProp)
             {
                 bool foam = material.IsKeywordEnabled(DY_SKY_FOAM_EDGE_ENABLE);
                 if (prop == foamProp)
                 {
-                    foam = EditorGUILayout.Toggle("Edge Foam", material.IsKeywordEnabled(DY_SKY_FOAM_EDGE_ENABLE));
+                    foam = EditorGUILayout.Toggle("Foam", material.IsKeywordEnabled(DY_SKY_FOAM_EDGE_ENABLE));
                     if (foam != material.IsKeywordEnabled(DY_SKY_FOAM_EDGE_ENABLE))
                     {
                         if (foam)
@@ -55,6 +76,9 @@ public class DySkyShaderWaterEditor : DySkyShaderEditor
                 }
                 if (!foam) continue;
             }
+
+            if ((prop.flags & MaterialProperty.PropFlags.HideInInspector) != 0) continue;
+
             if (prop.type == MaterialProperty.PropType.Texture)
                 materialEditor.TextureProperty(prop, prop.displayName);
             else if (prop.type == MaterialProperty.PropType.Color)
@@ -62,6 +86,7 @@ public class DySkyShaderWaterEditor : DySkyShaderEditor
             else
                 materialEditor.ShaderProperty(prop, prop.displayName);
         }
+
         base.OnGUI(materialEditor, emptyProps);
     }
 }

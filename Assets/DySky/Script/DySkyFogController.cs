@@ -128,21 +128,27 @@ public class DySkyFogController : MonoBehaviour
         if (!cubemap) return false;
         if (!Camera.main) return false;
 
+        const int layer_temp = 31;
+
         Transform transSkydome = skyController.transSkydome;
         MeshRenderer skydomeMR = transSkydome.GetComponent<MeshRenderer>();
 
-        int oldCM = Camera.main.cullingMask;
-        DepthTextureMode oldDTM = Camera.main.depthTextureMode;
         int oldLayer = transSkydome.gameObject.layer;
         Material oldMat = skydomeMR.sharedMaterial;
+
+        Camera bakeCamera = new GameObject("DySkyBakeFogCamera").AddComponent<Camera>();
+        bakeCamera.CopyFrom(Camera.main);
+        bakeCamera.enabled = false;
+        bakeCamera.depthTextureMode = DepthTextureMode.None;
+        bakeCamera.cullingMask = 1 << layer_temp;
+
+        transSkydome.gameObject.layer = layer_temp;
+        skydomeMR.sharedMaterial = matFogBake;
+
         bool success = false;
         try
         {
-            const int layer_temp = 31;
-            Camera.main.cullingMask = 1 << layer_temp;
-            transSkydome.gameObject.layer = layer_temp;
-            skydomeMR.sharedMaterial = matFogBake;
-            Camera.main.RenderToCubemap(cubemap);
+            bakeCamera.RenderToCubemap(cubemap);
             success = true;
         }
         catch(System.Exception e)
@@ -151,8 +157,8 @@ public class DySkyFogController : MonoBehaviour
         }
         skydomeMR.sharedMaterial = oldMat;
         transSkydome.gameObject.layer = oldLayer;
-        Camera.main.depthTextureMode = oldDTM;
-        Camera.main.cullingMask = oldCM;
+
+        GameObject.DestroyImmediate(bakeCamera.gameObject);
         return success;
     }
 

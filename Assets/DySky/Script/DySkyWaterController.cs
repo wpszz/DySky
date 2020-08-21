@@ -52,6 +52,11 @@ public class DySkyWaterController : MonoBehaviour
         SetupWaterKeys(sharedMaterial, quality);
     }
 
+    public void Refresh()
+    {
+        SetupWaterKeys(sharedMaterial, quality);
+    }
+
     private static void SetupWaterKeys(Material material, Quality quality)
     {
         if (!material || !material.shader) return;
@@ -61,19 +66,56 @@ public class DySkyWaterController : MonoBehaviour
             case Quality.High:
                 Shader.EnableKeyword("DY_SKY_GRAB_PASS_ENABLE");
                 Shader.EnableKeyword("DY_SKY_SOFT_EDGE_ENABLE");
-                material.shader.maximumLOD = 400;
-                if (Camera.main) Camera.main.depthTextureMode |= DepthTextureMode.Depth;
+                Shader.EnableKeyword("DY_SKY_WATER_HIGH");
+                Shader.DisableKeyword("DY_SKY_WATER_MID");
+                material.shader.maximumLOD = 300;
+                if (DySkyPreFrameBuffers.IsDepthEnable(Camera.main))
+                {
+                    if (Camera.main) Camera.main.depthTextureMode &= ~DepthTextureMode.Depth;
+                }
+                else
+                {
+                    if (Camera.main) Camera.main.depthTextureMode |= DepthTextureMode.Depth;
+                }
+                if (DySkyPreFrameBuffers.IsColorEnable(Camera.main))
+                {
+                    material.SetShaderPassEnabled("Always", false);
+                }
+                else
+                {
+                    material.SetShaderPassEnabled("Always", true);
+                }
                 break;
             case Quality.Mid:
                 Shader.EnableKeyword("DY_SKY_GRAB_PASS_ENABLE");
-                Shader.DisableKeyword("DY_SKY_SOFT_EDGE_ENABLE");
-                material.shader.maximumLOD = 300;
+                Shader.DisableKeyword("DY_SKY_WATER_HIGH");
+                Shader.EnableKeyword("DY_SKY_WATER_MID");
+                if (DySkyPreFrameBuffers.IsDepthEnable(Camera.main))
+                {
+                    Shader.EnableKeyword("DY_SKY_SOFT_EDGE_ENABLE");
+                    material.shader.maximumLOD = 250;
+                }
+                else
+                {
+                    Shader.DisableKeyword("DY_SKY_SOFT_EDGE_ENABLE");
+                    material.shader.maximumLOD = 200;
+                }
                 if (Camera.main) Camera.main.depthTextureMode &= ~DepthTextureMode.Depth;
+                if (DySkyPreFrameBuffers.IsColorEnable(Camera.main))
+                {
+                    material.SetShaderPassEnabled("Always", false);
+                }
+                else
+                {
+                    material.SetShaderPassEnabled("Always", true);
+                }
                 break;
             default:
                 Shader.DisableKeyword("DY_SKY_GRAB_PASS_ENABLE");
                 Shader.DisableKeyword("DY_SKY_SOFT_EDGE_ENABLE");
-                material.shader.maximumLOD = 200;
+                Shader.DisableKeyword("DY_SKY_WATER_HIGH");
+                Shader.DisableKeyword("DY_SKY_WATER_MID");
+                material.shader.maximumLOD = 100;
                 if (Camera.main) Camera.main.depthTextureMode &= ~DepthTextureMode.Depth;
                 break;
         }
