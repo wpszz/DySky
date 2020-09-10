@@ -10,11 +10,12 @@
 		_WaveSpeedX("Wave Speed X", Range(-1.0, 1.0)) = 0.25
 		_WaveSpeedZ("Wave Speed Z", Range(-1.0, 1.0)) = -0.25
 
-		_DepthOpaqueFactor("Opaque Factor", Range(5.0, 50.0)) = 10
-
 		_SpecularPower("Specular Power", Range(1.0, 500.0)) = 150.0
 		_FresnelScale("Freshnel Scale", Range(0.1, 1.0)) = 0.5
-		_BaseColor("Base color", COLOR) = (0.3820755, 0.7432312, .99, 0.5)
+
+		_RefractFactor("Refract Factor", Range(5.0, 20.0)) = 10
+		_RefractShallowColor("Refract color(Shallow)", COLOR) = (0.36, 0.88, 0.78, 0.73)
+		_RefractDeepColor("Refract color(Deep)", COLOR) = (0.0, 0.56, 0.82, 1.0)
 		_ReflectColor("Reflect color", COLOR) = (1.0, 1.0, 1.0, 0.7)
 		_DistortionStrength("Distortion Strength", Range(0.01, 0.3)) = 0.05
 
@@ -35,11 +36,12 @@
 	half _WaveSpeedX;
 	half _WaveSpeedZ;
 
-	half _DepthOpaqueFactor;
-
 	half _SpecularPower;
 	half _FresnelScale;
-	half4 _BaseColor;
+
+	half _RefractFactor;
+	half4 _RefractShallowColor;
+	half4 _RefractDeepColor;
 	half4 _ReflectColor;
 
 	sampler2D _CameraColorTexture;
@@ -160,8 +162,9 @@
 #ifdef DY_SKY_SOFT_EDGE_ENABLE
 		half sceneZ = LinearEyeDepth(SAMPLE_DEPTH_TEXTURE_PROJ(_CameraDepthTexture, UNITY_PROJ_COORD(i.projPos)));
 		half partZ = i.projPos.z;
-		half depthOpaque = smoothstep(5.0, -_DepthOpaqueFactor, partZ - sceneZ);
+		half depthOpaque = smoothstep(5.0, -_RefractFactor, partZ - sceneZ);
 #else
+		half sceneZ = 0;
 		half depthOpaque = 0.8;
 #endif
 
@@ -169,9 +172,10 @@
 		half4 grabPos = UNITY_PROJ_COORD(i.grabPos);
 		grabPos.xy += normal.xz * _DistortionStrength;
 		half4 grabColor = tex2Dproj(_CameraColorTexture, grabPos);
-		half4 refractColor = lerp(grabColor, _BaseColor, _BaseColor.a * depthOpaque);
+		half4 waterColor = lerp(_RefractShallowColor, _RefractDeepColor, depthOpaque);
+		half4 refractColor = lerp(grabColor, waterColor, waterColor.a * smoothstep(1.0, 3.0, sceneZ));
 #else
-		half4 refractColor = half4(_BaseColor.rgb, _BaseColor.a * depthOpaque);
+		half4 refractColor = half4(_RefractShallowColor.rgb, _RefractShallowColor.a * depthOpaque);
 #endif
 
 #ifdef DY_SKY_REFLECT_SKY

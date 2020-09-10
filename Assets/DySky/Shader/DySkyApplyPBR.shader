@@ -224,6 +224,9 @@
 				half3 lightColor = _LightColor0.rgb * atten;
 				col.rgb = BRDF(worldNormal, worldViewDir, worldLightDir, lightColor, roughness, diffuse, specular, indirectDiffuse, indirectSpecular);
 
+				// Exposure.
+				col = saturate(1.0 - exp(-_DySky_tExposure * col));
+
 				// DySky Fog
 				DY_SKY_FOG_FRAG(IN, col)
 				return col;

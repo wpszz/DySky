@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Water2
+  m_Name: Water3
   m_Shader: {fileID: 4800000, guid: 578f2fba4cd4a2b428a8d87bf9cfc918, type: 3}
   m_ShaderKeywords: DY_SKY_FOAM_EDGE_ENABLE DY_SKY_REFLECT_SKY
   m_LightmapFlags: 4
@@ -90,7 +90,7 @@ Material:
     - _EdgeInvFade: 2.76
     - _EdgeInvGradent: 4
     - _FresnelPower: 5
-    - _FresnelScale: 1
+    - _FresnelScale: 0.5
     - _GeoWaveEdgeLen: 0.5
     - _GeoWaveLength: 0.5
     - _GeoWavePhase: 0.5
@@ -102,7 +102,7 @@ Material:
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _RefractFactor: 10
+    - _RefractFactor: 5
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SpecularPower: 200
@@ -131,7 +131,7 @@ Material:
     - _GeoWaveRot: {r: -0.34, g: 0.47, b: 0.82, a: -0.61}
     - _ReflectColor: {r: 1, g: 1, b: 1, a: 0.7}
     - _RefractDeepColor: {r: 0, g: 0.56, b: 0.82, a: 1}
-    - _RefractShallowColor: {r: 0.3600481, g: 0.8773585, b: 0.783302, a: 0.73}
+    - _RefractShallowColor: {r: 0, g: 1, b: 0.72765326, a: 0.73}
     - _SpecularColor: {r: 1, g: 1, b: 1, a: 0.5019608}
     - _WaveSpeed: {r: 1.1, g: 1.1, b: -1.1, a: 1.1}
     - _WaveTiling: {r: 2, g: 2, b: -2, a: 2}

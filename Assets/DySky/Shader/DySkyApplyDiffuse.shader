@@ -127,6 +127,9 @@
 	#endif
 				col.rgb += albedo * DySkyGI(atten, IN.worldPos, IN.worldNormal, ambient, lmap);
 #endif
+				// Exposure.
+				col = saturate(1.0 - exp(-_DySky_tExposure * col));
+
 				// DySky Fog
 				DY_SKY_FOG_FRAG(IN, col)
 				return col;
